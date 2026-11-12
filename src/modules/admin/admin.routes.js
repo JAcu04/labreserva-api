@@ -19,7 +19,8 @@ adminRouter.post('/labs', requireAdmin, (req, res) => {
   res.status(201).json(labsRepository.create(req.body));
 });
 
-adminRouter.delete('/users/:id', (req, res) => {
+// H02: faltaba requireAdmin aqui (las otras dos rutas de este router si lo tenian).
+adminRouter.delete('/users/:id', requireAdmin, (req, res) => {
   if (!usersRepository.remove(req.params.id)) throw new HttpError(404, 'Usuario no encontrado');
   res.status(204).end();
 });
