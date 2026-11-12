@@ -1,9 +1,26 @@
 import { Router } from 'express';
-import _ from 'lodash';
 import { requireAuth } from '../../middlewares/auth.js';
 import { usersRepository } from './users.repository.js';
+import { HttpError } from '../../utils/http-error.js';
 
 const withoutHash = ({ password_hash, ...user }) => user;
+
+// H01: campos que el propio usuario puede editar de su perfil.
+// "role" (y cualquier otro campo del modelo) queda fuera a propósito:
+// nunca debe poder venir del cliente.
+const SELF_SERVICE_FIELDS = ['name', 'phone', 'carnet'];
+
+function buildProfileUpdate(body) {
+  const rejected = Object.keys(body).filter((key) => !SELF_SERVICE_FIELDS.includes(key));
+  if (rejected.length > 0) {
+    throw new HttpError(400, `Campo no editable: ${rejected.join(', ')}`);
+  }
+  const changes = {};
+  for (const field of SELF_SERVICE_FIELDS) {
+    if (body[field] !== undefined) changes[field] = body[field];
+  }
+  return changes;
+}
 
 export const usersRouter = Router();
 
@@ -19,8 +36,11 @@ usersRouter.get('/me', (req, res) => {
 });
 
 // Actualizar el perfil propio (nombre, teléfono, carnet...).
+// H01: solo se aceptan los campos de SELF_SERVICE_FIELDS; cualquier otro
+// campo en el body (como "role") hace que la petición se rechace con 400.
 usersRouter.patch('/me', (req, res) => {
   const user = usersRepository.findById(req.user.id);
-  const updated = usersRepository.update(_.merge(user, req.body));
+  const changes = buildProfileUpdate(req.body);
+  const updated = usersRepository.update({ ...user, ...changes });
   res.json(withoutHash(updated));
 });
