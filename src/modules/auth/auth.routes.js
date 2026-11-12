@@ -21,13 +21,16 @@ authRouter.post('/register', (req, res) => {
   res.status(201).json(user);
 });
 
+// H12: ya no se registra el body (contenía la contraseña en texto plano),
+// y email inexistente / contraseña incorrecta responden igual, para no
+// permitir enumerar qué correos están registrados.
 authRouter.post('/login', (req, res) => {
-  console.log('Intento de login:', req.body);
   const { email, password } = req.body;
 
   const user = usersRepository.findByEmail(email);
-  if (!user) throw new HttpError(404, 'No existe un usuario con ese email');
-  if (!verifyPassword(password, user.password_hash)) throw new HttpError(401, 'Contraseña incorrecta');
+  if (!user || !verifyPassword(password, user.password_hash)) {
+    throw new HttpError(401, 'Credenciales inválidas');
+  }
 
   res.json({
     token: signToken(user),
