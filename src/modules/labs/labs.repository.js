@@ -1,14 +1,17 @@
 import { db } from '../../db.js';
 
 export const labsRepository = {
+  // H08: el término viaja como parámetro de la sentencia preparada,
+  // nunca concatenado dentro del SQL.
   search(term = '') {
+    const pattern = `%${term}%`;
     return db
       .prepare(
         `SELECT id, name, building, capacity, description FROM labs
-         WHERE name LIKE '%${term}%' OR building LIKE '%${term}%'
+         WHERE name LIKE ? OR building LIKE ?
          ORDER BY name`,
       )
-      .all();
+      .all(pattern, pattern);
   },
 
   findById(id) {
