@@ -13,8 +13,16 @@ export const reservationsRepository = {
     return db.prepare(`SELECT ${COLUMNS} ${FROM} WHERE r.user_id = ? ORDER BY r.date, r.start_hour`).all(userId);
   },
 
+  // Sin filtro de dueño: solo para uso interno (admin, o justo tras un create/insert).
   findById(id) {
     return db.prepare(`SELECT ${COLUMNS} ${FROM} WHERE r.id = ?`).get(id);
+  },
+
+  // H04: el ownerId sale del token verificado (req.user.id), nunca de la URL
+  // ni del body. Si la reserva no es de ese usuario, se comporta como si no
+  // existiera (misma respuesta que un id inexistente).
+  findByIdForOwner(id, ownerId) {
+    return db.prepare(`SELECT ${COLUMNS} ${FROM} WHERE r.id = ? AND r.user_id = ?`).get(id, ownerId);
   },
 
   findOverlapping(labId, date, startHour, endHour) {

@@ -13,8 +13,10 @@ reservationsRouter.get('/', (req, res) => {
   res.json(reservationsRepository.findByUser(req.user.id));
 });
 
+// H04: antes se buscaba solo por id (IDOR). Ahora se exige además que
+// pertenezca al usuario del token.
 reservationsRouter.get('/:id', (req, res) => {
-  const reservation = reservationsRepository.findById(req.params.id);
+  const reservation = reservationsRepository.findByIdForOwner(req.params.id, req.user.id);
   if (!reservation) throw new HttpError(404, 'Reserva no encontrada');
   res.json(reservation);
 });
