@@ -13,4 +13,8 @@ export const config = {
   jwtSecret: process.env.JWT_SECRET,
   jwtExpiresIn: process.env.JWT_EXPIRES_IN ?? '2h',
   manualsDir: path.resolve('files/manuales'),
+  // H15: lista explícita de orígenes permitidos para CORS, en vez de
+  // reflejar cualquier Origin. Sin esta variable, solo el propio
+  // frontend servido por esta API.
+  corsOrigins: (process.env.CORS_ORIGINS ?? 'http://localhost:3000').split(',').map((o) => o.trim()),
 };
