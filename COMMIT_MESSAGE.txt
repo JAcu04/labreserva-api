@@ -1,0 +1,17 @@
+commit 7f7c974bedc68d01b96664b1df84bd7de9643370
+fix(H10): secreto JWT obligatorio, tokens con expiracion y algoritmo fijo
+
+Evidencia (identificada por inspeccion, Parte B): config.js tenia
+'supersecreto' como valor por defecto si faltaba JWT_SECRET; jwt.js
+firmaba sin expiresIn (tokens validos para siempre) y verificaba sin
+restringir el algoritmo.
+
+Causa raiz: configuracion insegura de la firma y el ciclo de vida del
+JWT.
+
+Correccion: config.js lanza un error al arrancar si falta
+JWT_SECRET (sin valor por defecto); se agrega jwtExpiresIn
+(JWT_EXPIRES_IN, 2h por defecto); signToken/verifyToken fijan
+algorithm/algorithms a HS256 en vez de dejarlo implicito. Capa:
+configuracion y autenticacion.
+
