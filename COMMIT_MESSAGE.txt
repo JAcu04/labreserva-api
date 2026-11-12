@@ -1,17 +1,15 @@
-commit 7f7c974bedc68d01b96664b1df84bd7de9643370
-fix(H10): secreto JWT obligatorio, tokens con expiracion y algoritmo fijo
+commit cca4cca02ee30491c74f1b171541de0a5e0a49b1
+fix(H11): evitar XSS almacenado en los comentarios del frontend
 
-Evidencia (identificada por inspeccion, Parte B): config.js tenia
-'supersecreto' como valor por defecto si faltaba JWT_SECRET; jwt.js
-firmaba sin expiresIn (tokens validos para siempre) y verificaba sin
-restringir el algoritmo.
+Evidencia (identificada por inspeccion, Parte B): openLab() insertaba
+c.body directo dentro de innerHTML; un comentario con
+<img src=x onerror=alert(1)> se ejecutaria en el navegador de
+cualquiera que abriera ese laboratorio.
 
-Causa raiz: configuracion insegura de la firma y el ciclo de vida del
-JWT.
+Causa raiz: contenido de usuario interpretado como HTML al
+renderizarse.
 
-Correccion: config.js lanza un error al arrancar si falta
-JWT_SECRET (sin valor por defecto); se agrega jwtExpiresIn
-(JWT_EXPIRES_IN, 2h por defecto); signToken/verifyToken fijan
-algorithm/algorithms a HS256 en vez de dejarlo implicito. Capa:
-configuracion y autenticacion.
+Correccion: renderComments() arma los <li> con createElement y
+textContent/Element.append (que trata los strings como texto, nunca
+como markup), en vez de interpolar en innerHTML. Capa: frontend.
 

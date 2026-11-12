@@ -44,9 +44,33 @@ async function openLab(id) {
   $('#lab-section').hidden = false;
   $('#lab-name').textContent = lab.name;
   $('#lab-description').textContent = lab.description ?? '';
-  $('#comments').innerHTML =
-    lab.comments.map((c) => `<li><strong>${c.author}:</strong> ${c.body}</li>`).join('') ||
-    '<li class="muted">Sin comentarios</li>';
+  renderComments(lab.comments);
+}
+
+// H11: el cuerpo de un comentario es contenido de un usuario, no HTML de
+// confianza. Antes se insertaba con innerHTML y un comentario como
+// "<img src=x onerror=alert(1)>" se ejecutaba en el navegador de
+// cualquiera que abriera el laboratorio. Ahora se arma el DOM con
+// textContent, que nunca interpreta lo que recibe como markup.
+function renderComments(comments) {
+  const list = $('#comments');
+  list.innerHTML = '';
+
+  if (comments.length === 0) {
+    const empty = document.createElement('li');
+    empty.className = 'muted';
+    empty.textContent = 'Sin comentarios';
+    list.append(empty);
+    return;
+  }
+
+  for (const c of comments) {
+    const item = document.createElement('li');
+    const author = document.createElement('strong');
+    author.textContent = c.author + ':';
+    item.append(author, ' ' + c.body);
+    list.append(item);
+  }
 }
 
 async function loadReservations() {
