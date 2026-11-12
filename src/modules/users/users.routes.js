@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { requireAuth } from '../../middlewares/auth.js';
+import { requireAuth, requireRole } from '../../middlewares/auth.js';
 import { usersRepository } from './users.repository.js';
 import { HttpError } from '../../utils/http-error.js';
 
@@ -26,9 +26,11 @@ export const usersRouter = Router();
 
 usersRouter.use(requireAuth);
 
-// Directorio: los profesores lo usan para buscar a los estudiantes de su grupo.
-usersRouter.get('/', (_req, res) => {
-  res.json(usersRepository.findAll());
+// Directorio: los profesores (y admins) lo usan para buscar a los estudiantes
+// de su grupo. H03: antes cualquier usuario autenticado lo veia, hashes
+// incluidos; ahora exige rol y nunca devuelve password_hash.
+usersRouter.get('/', requireRole('profesor', 'admin'), (_req, res) => {
+  res.json(usersRepository.findAll().map(withoutHash));
 });
 
 usersRouter.get('/me', (req, res) => {

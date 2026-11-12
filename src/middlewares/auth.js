@@ -18,3 +18,14 @@ export function requireAdmin(req, _res, next) {
   if (req.user?.role !== 'admin') throw new HttpError(403, 'Solo para administradores');
   next();
 }
+
+// H03: helper generico de autorizacion por rol, para no repetir la
+// comprobacion a mano en cada ruta que necesite restringirse a ciertos roles.
+export function requireRole(...allowedRoles) {
+  return (req, _res, next) => {
+    if (!allowedRoles.includes(req.user?.role)) {
+      throw new HttpError(403, 'No tiene permisos para este recurso');
+    }
+    next();
+  };
+}
