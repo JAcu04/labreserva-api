@@ -43,7 +43,10 @@ reservationsRouter.post('/', (req, res) => {
   res.status(201).json(reservation);
 });
 
+// H05: antes se borraba solo por id (IDOR); ahora exige que sea el dueño.
 reservationsRouter.delete('/:id', (req, res) => {
-  if (!reservationsRepository.remove(req.params.id)) throw new HttpError(404, 'Reserva no encontrada');
+  if (!reservationsRepository.removeForOwner(req.params.id, req.user.id)) {
+    throw new HttpError(404, 'Reserva no encontrada');
+  }
   res.status(204).end();
 });

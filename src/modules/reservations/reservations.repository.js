@@ -42,7 +42,13 @@ export const reservationsRepository = {
     return this.findById(lastInsertRowid);
   },
 
+  // Sin filtro de dueño: solo para uso interno (admin).
   remove(id) {
     return db.prepare('DELETE FROM reservations WHERE id = ?').run(id).changes > 0;
+  },
+
+  // H05: mismo principio que findByIdForOwner, aplicado a la cancelación.
+  removeForOwner(id, ownerId) {
+    return db.prepare('DELETE FROM reservations WHERE id = ? AND user_id = ?').run(id, ownerId).changes > 0;
   },
 };
