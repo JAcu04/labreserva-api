@@ -5,7 +5,6 @@ import { labsRouter } from './modules/labs/labs.routes.js';
 import { reservationsRouter } from './modules/reservations/reservations.routes.js';
 import { filesRouter } from './modules/files/files.routes.js';
 import { adminRouter } from './modules/admin/admin.routes.js';
-import { debugRouter } from './modules/debug/debug.routes.js';
 
 export const apiRouter = Router();
 
@@ -17,4 +16,8 @@ apiRouter.use('/labs', labsRouter);
 apiRouter.use('/reservations', reservationsRouter);
 apiRouter.use('/files', filesRouter);
 apiRouter.use('/admin', adminRouter);
-apiRouter.use('/debug', debugRouter);
+
+// H06: existía una ruta de diagnóstico (/debug/config) que devolvía la
+// configuración completa del servidor, incluido el secreto JWT, sin
+// autenticación. Se retira por completo: ningún endpoint debe exponer
+// secretos ni configuración interna.

@@ -1,0 +1,14 @@
+commit d94284fcd4dd7b3a8a4e07349eb0debe83effe67
+fix(H06): retirar el endpoint de diagnostico /api/debug/config
+
+Evidencia original: GET /api/debug/config sin token devolvia la
+configuracion completa, incluido jwtSecret en texto plano.
+
+Causa raiz: existia una ruta de diagnostico montada en la API sin
+ningun middleware de autenticacion, pensada para depurar pero nunca
+retirada.
+
+Correccion: se elimina el modulo debug por completo; una ruta asi no
+deberia llegar a produccion ni protegida, porque devolver secretos en
+una respuesta HTTP es el problema de fondo. Capa: API.
+
