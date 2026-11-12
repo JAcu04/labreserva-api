@@ -1,10 +1,21 @@
 import { Router } from 'express';
+import rateLimit from 'express-rate-limit';
 import { HttpError } from '../../utils/http-error.js';
 import { hashPassword, verifyPassword } from '../../lib/password.js';
 import { signToken } from '../../lib/jwt.js';
 import { usersRepository } from '../users/users.repository.js';
 
 export const authRouter = Router();
+
+// H13: frena fuerza bruta/credential stuffing contra login y registro.
+const authLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  limit: 20,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: 'Demasiados intentos. Intente de nuevo en unos minutos.' },
+});
+authRouter.use(authLimiter);
 
 authRouter.post('/register', (req, res) => {
   const { name, email, password, carnet } = req.body;
